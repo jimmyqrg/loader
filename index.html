@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Jimmy Q.R.G.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link id="cloakFavicon" rel="icon" href="https://www.jimmyqrg.com/icon.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Josefin Sans', sans-serif;
+        }
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #475569;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main content area with iframe */
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #main-iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background-color: var(--bg-secondary);
+        }
+
+        /* Bottom menu container */
+        .menu-container {
+            position: relative;
+            z-index: 100;
+        }
+
+        /* Thin bottom menu (collapsed state) */
+        .bottom-menu {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: height 0.3s ease;
+            overflow: hidden;
+        }
+
+        /* Expanded menu state */
+        .bottom-menu.expanded {
+            height: 120px;
+        }
+
+        /* Toggle button - stays on menu */
+        .toggle-btn {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: none;
+            width: 80px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+        
+        .toggle-btn:hover {
+            color: var(--accent);
+        }
+        
+        .toggle-btn:hover .double-arrow {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .double-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Menu content (hidden when collapsed) */
+        .menu-content {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 20px 10px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .bottom-menu.expanded .menu-content {
+            opacity: 1;
+        }
+
+        /* Menu buttons */
+        .menu-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            min-width: 70px;
+        }
+
+        .menu-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .menu-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .menu-btn:disabled:hover {
+            background-color: transparent;
+            color: var(--text-secondary);
+        }
+
+        .menu-btn.active {
+            color: var(--accent);
+        }
+
+        .menu-btn .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .menu-btn .text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Cloak flip icon */
+        .flipped {
+            transform: scaleX(-1);
+        }
+
+        /* Modal overlay and popup */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .close-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-tertiary);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .hidden-options {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .hidden-options.expanded {
+            max-height: 500px;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .icon-option {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 5px;
+        }
+
+        .icon-option:hover {
+            border-color: var(--accent);
+            background-color: var(--bg-tertiary);
+        }
+
+        .icon-option.selected {
+            border-color: var(--accent);
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .icon-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .icon-name {
+            font-size: 11px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background-color: var(--bg-tertiary);
+        }
+
+        .upload-area .icon {
+            font-size: 40px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border);
+        }
+
+        /* Notification messages */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--accent);
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow);
+            z-index: 2000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            border-left-color: var(--danger);
+        }
+
+        .notification .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .notification .notification-message {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Redirect overlay */
+        .redirect-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .redirect-overlay h1 {
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .redirect-overlay p {
+            margin-bottom: 30px;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .spinner {
+            border: 4px solid var(--bg-tertiary);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Notification container -->
+    <div id="notificationContainer"></div>
+
+    <!-- Main content (shown if no redirect) -->
+    <div id="mainContent" class="content">
+        <iframe id="main-iframe" title="Grades"></iframe>
+        
+        <div class="menu-container">
+            <div class="bottom-menu" id="bottomMenu">
+                <button class="toggle-btn" id="toggleMenu">
+                    <div class="double-arrow">
+                        <span class="material-icons" id="toggleIcon">keyboard_double_arrow_up</span>
+                    </div>
+                </button>
+                
+                <div class="menu-content" id="menuContent">
+                    <!-- Changed from Home to Close button -->
+                    <button class="menu-btn" id="btnClose">
+                        <span class="material-icons icon">close</span>
+                        <span class="text">Close</span>
+                    </button>
+                    
+                    <button class="menu-btn" id="btnSound">
+                        <span class="material-icons icon" id="soundIcon">volume_up</span>
+                        <span class="text">Sound On</span>
+                    </button>
+                    
+                    <button class="menu-btn" id="btnRefresh">
+                        <span class="material-icons icon">refresh</span>
+                        <span class="text">Refresh</span>
+                    </button>
+                    
+                    <button class="menu-btn" id="btnDownload">
+                        <span class="material-icons icon">download</span>
+                        <span class="text">Download</span>
+                    </button>
+                    
+                    <button class="menu-btn" id="btnFullscreen">
+                        <span class="material-icons icon">fullscreen</span>
+                        <span class="text">Fullscreen</span>
+                    </button>
+                    
+                    <button class="menu-btn" id="btnCloak">
+                        <span class="material-icons icon flipped">open_in_new</span>
+                        <span class="text">Cloak</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cloak Modal -->
+    <div class="modal-overlay" id="cloakModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Tab Cloaking</h2>
+                <button class="close-btn" id="closeModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Use default tab cloak</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="defaultCloak" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="hidden-options" id="customCloakOptions">
+                    <div class="form-group">
+                        <label class="form-label">Tab Icon</label>
+                        <div class="icon-grid" id="iconGrid">
+                            <!-- Icons will be added dynamically -->
+                        </div>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <span class="material-icons icon">file_upload</span>
+                            <p>Upload Custom Image</p>
+                            <input type="file" id="fileUpload" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tab Name</label>
+                        <input type="text" class="text-input" id="tabName" placeholder="Enter tab name">
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" id="applyCloak">Apply Cloak</button>
+                    <button class="btn btn-secondary" id="cancelCloak">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // DOM Elements
+    const mainContent = document.getElementById('mainContent');
+    const mainIframe = document.getElementById('main-iframe');
+    const bottomMenu = document.getElementById('bottomMenu');
+    const toggleMenu = document.getElementById('toggleMenu');
+    const toggleIcon = document.getElementById('toggleIcon');
+    const menuContent = document.getElementById('menuContent');
+    const notificationContainer = document.getElementById('notificationContainer');
+    
+    // Menu buttons
+    const btnClose = document.getElementById('btnClose'); // Changed from btnHome
+    const btnSound = document.getElementById('btnSound');
+    const soundIcon = document.getElementById('soundIcon');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const btnDownload = document.getElementById('btnDownload');
+    const btnFullscreen = document.getElementById('btnFullscreen');
+    const btnCloak = document.getElementById('btnCloak');
+    
+    // Cloak modal elements
+    const cloakModal = document.getElementById('cloakModal');
+    const closeModal = document.getElementById('closeModal');
+    const defaultCloak = document.getElementById('defaultCloak');
+    const customCloakOptions = document.getElementById('customCloakOptions');
+    const iconGrid = document.getElementById('iconGrid');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileUpload = document.getElementById('fileUpload');
+    const tabName = document.getElementById('tabName');
+    const applyCloak = document.getElementById('applyCloak');
+    const cancelCloak = document.getElementById('cancelCloak');
+    
+    // State variables
+    let isMenuExpanded = false;
+    let isFullscreen = false;
+    let isSoundOn = true;
+    let selectedIcon = 'default.png';
+    const iconOptions = [
+        { name: 'Default', url: 'https://learn.jimmyqrg.com/cloak-images/default.png' },
+        { name: 'Gmail', url: 'https://learn.jimmyqrg.com/cloak-images/gmail.png' },
+        { name: 'Drive', url: 'https://learn.jimmyqrg.com/cloak-images/drive.png' },
+        { name: 'Docs', url: 'https://learn.jimmyqrg.com/cloak-images/docs.png' },
+        { name: 'Forms', url: 'https://learn.jimmyqrg.com/cloak-images/forms.png' },
+        { name: 'Pausd', url: 'https://learn.jimmyqrg.com/cloak-images/pausd.png' },
+        { name: 'Schoology', url: 'https://learn.jimmyqrg.com/cloak-images/schoology.png' },
+        { name: 'JimmyQRG', url: 'https://www.jimmyqrg.com/icon.png' }
+    ];
+    
+    // Initialize the page
+    function init() {
+        // Apply cloak settings immediately
+        applyCloakImmediately();
+        
+        // Check for ?content= parameter
+        checkContentParam();
+        
+        // Setup event listeners
+        setupEventListeners();
+        
+        // Populate icon grid
+        populateIconGrid();
+        
+        // Load saved cloak settings
+        loadCloakSettings();
+    }
+    
+    // Apply cloak immediately (before any other scripts run)
+    function applyCloakImmediately() {
+        const savedTitle = localStorage.getItem('cloakTabName');
+        const savedIcon = localStorage.getItem('cloakIcon');
+        const savedDefaultCloak = localStorage.getItem('defaultCloak');
+        
+        // Only apply custom cloak if default cloak is not enabled
+        if (savedDefaultCloak !== 'true') {
+            if (savedTitle) {
+                document.title = savedTitle;
+            }
+            
+            if (savedIcon) {
+                const favicon = document.getElementById('cloakFavicon');
+                if (favicon) {
+                    favicon.href = savedIcon;
+                }
+                // Also update all existing favicon links
+                const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+                existingFavicons.forEach(link => {
+                    link.href = savedIcon;
+                });
+            }
+        }
+    }
+    
+    // Check for ?content= parameter and load URL
+    function checkContentParam() {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('content');
+        
+        let urlToLoad = 'https://learn.jimmyqrg.com/?page=extend'; // Default URL
+        
+        if (raw) {
+            // Decode and validate URL from ?content= parameter
+            let decoded;
+            try { 
+                decoded = decodeURIComponent(raw); 
+            } catch { 
+                console.log('Error: could not decode the content parameter.');
+                // Use default URL
+            }
+            
+            if (decoded) {
+                try { 
+                    const url = new URL(decoded);
+                    if (["http:", "https:"].includes(url.protocol)) {
+                        urlToLoad = url.href;
+                    }
+                } catch { 
+                    console.log('Error: invalid URL in content parameter.');
+                }
+            }
+        }
+        
+        // Load the URL in the iframe
+        mainIframe.src = urlToLoad;
+    }
+    
+    function setupEventListeners() {
+        // Toggle menu
+        toggleMenu.addEventListener('click', toggleMenuState);
+        
+        // Click iframe to collapse menu
+        mainIframe.addEventListener('click', () => {
+            if (isMenuExpanded) {
+                collapseMenu();
+            }
+        });
+        
+        // ESC key to collapse menu or close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (isMenuExpanded) {
+                    collapseMenu();
+                }
+                
+                if (cloakModal.classList.contains('active')) {
+                    closeCloakModal();
+                }
+                
+                // Also exit fullscreen if active
+                if (isFullscreen) {
+                    exitFullscreen();
+                }
+            }
+        });
+        
+        // Menu button events
+        btnClose.addEventListener('click', () => {
+            window.close();
+            collapseMenu();
+        });
+        
+        btnSound.addEventListener('click', toggleSound);
+        
+        btnRefresh.addEventListener('click', () => {
+            mainIframe.contentWindow.location.reload();
+            collapseMenu();
+        });
+        
+        btnDownload.addEventListener('click', downloadSource);
+        
+        btnFullscreen.addEventListener('click', toggleFullscreen);
+        
+        btnCloak.addEventListener('click', openCloakModal);
+        
+        // Cloak modal events
+        closeModal.addEventListener('click', closeCloakModal);
+        cloakModal.addEventListener('click', (e) => {
+            if (e.target === cloakModal) {
+                closeCloakModal();
+            }
+        });
+        
+        defaultCloak.addEventListener('change', toggleCustomCloakOptions);
+        
+        uploadArea.addEventListener('click', () => {
+            fileUpload.click();
+        });
+        
+        fileUpload.addEventListener('change', handleImageUpload);
+        
+        applyCloak.addEventListener('click', applyCloakSettings);
+        cancelCloak.addEventListener('click', () => {
+            // Check if default cloak is checked before closing
+            if (defaultCloak.checked) {
+                resetToDefaultCloak();
+            }
+            closeCloakModal();
+        });
+        
+        // Fullscreen change listener
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    }
+    
+    function toggleMenuState() {
+        if (isMenuExpanded) {
+            collapseMenu();
+        } else {
+            expandMenu();
+        }
+    }
+    
+    function expandMenu() {
+        bottomMenu.classList.add('expanded');
+        toggleIcon.textContent = 'expand_more';
+        isMenuExpanded = true;
+    }
+    
+    function collapseMenu() {
+        bottomMenu.classList.remove('expanded');
+        toggleIcon.textContent = 'expand_less';
+        isMenuExpanded = false;
+    }
+    
+    function toggleSound() {
+        isSoundOn = !isSoundOn;
+        
+        if (isSoundOn) {
+            soundIcon.textContent = 'volume_up';
+            btnSound.querySelector('.text').textContent = 'Sound On';
+            // In a real implementation, you would unmute the iframe here
+            // Note: This is challenging due to browser security restrictions
+        } else {
+            soundIcon.textContent = 'volume_off';
+            btnSound.querySelector('.text').textContent = 'Sound Off';
+            // In a real implementation, you would mute the iframe here
+            // Note: This is challenging due to browser security restrictions
+        }
+        
+        collapseMenu();
+    }
+    
+    async function downloadSource() {
+        try {
+            // Get current iframe URL
+            const iframeUrl = mainIframe.src;
+            
+            // Try to fetch the source code
+            const response = await fetch(iframeUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const sourceCode = await response.text();
+            
+            // Create a blob and download link
+            const blob = new Blob([sourceCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'website_source.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Download Successful', 'Source code has been downloaded.', 'success');
+            
+        } catch (error) {
+            console.error('Download error:', error);
+            
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                showNotification('Unable to fetch source', 'The website source code could not be accessed.', 'error');
+            } else {
+                showNotification('Unable to download', 'An unknown error occurred while downloading.', 'error');
+            }
+        }
+        
+        collapseMenu();
+    }
+    
+    function toggleFullscreen() {
+        if (!isFullscreen) {
+            enterFullscreen();
+        } else {
+            exitFullscreen();
+        }
+        
+        collapseMenu();
+    }
+    
+    function enterFullscreen() {
+        const iframeElement = mainIframe;
+        
+        // Use the Fullscreen API
+        if (iframeElement.requestFullscreen) {
+            iframeElement.requestFullscreen();
+        } else if (iframeElement.webkitRequestFullscreen) {
+            iframeElement.webkitRequestFullscreen();
+        } else if (iframeElement.mozRequestFullScreen) {
+            iframeElement.mozRequestFullScreen();
+        } else if (iframeElement.msRequestFullscreen) {
+            iframeElement.msRequestFullscreen();
+        }
+        
+        isFullscreen = true;
+        
+        // Update button text/icon
+        btnFullscreen.querySelector('.icon').textContent = 'fullscreen_exit';
+        btnFullscreen.querySelector('.text').textContent = 'Exit Fullscreen';
+    }
+    
+    function exitFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+        
+        isFullscreen = false;
+        
+        // Update button text/icon
+        btnFullscreen.querySelector('.icon').textContent = 'fullscreen';
+        btnFullscreen.querySelector('.text').textContent = 'Fullscreen';
+        
+        collapseMenu();
+    }
+    
+    function handleFullscreenChange() {
+        isFullscreen = !!(document.fullscreenElement || 
+                        document.webkitFullscreenElement || 
+                        document.mozFullScreenElement || 
+                        document.msFullscreenElement);
+        
+        // Update button state
+        if (isFullscreen) {
+            btnFullscreen.querySelector('.icon').textContent = 'fullscreen_exit';
+            btnFullscreen.querySelector('.text').textContent = 'Exit Fullscreen';
+        } else {
+            btnFullscreen.querySelector('.icon').textContent = 'fullscreen';
+            btnFullscreen.querySelector('.text').textContent = 'Fullscreen';
+            collapseMenu();
+        }
+    }
+    
+    function openCloakModal() {
+        cloakModal.classList.add('active');
+        collapseMenu();
+    }
+    
+    function closeCloakModal() {
+        cloakModal.classList.remove('active');
+        loadCloakSettings(); // Reset to saved settings
+    }
+    
+    function toggleCustomCloakOptions() {
+        if (defaultCloak.checked) {
+            customCloakOptions.classList.remove('expanded');
+            // Reset to default immediately when checkbox is checked
+            resetToDefaultCloak();
+            // Save the setting
+            localStorage.setItem('defaultCloak', 'true');
+        } else {
+            customCloakOptions.classList.add('expanded');
+            // Save the setting
+            localStorage.setItem('defaultCloak', 'false');
+        }
+    }
+    
+    function populateIconGrid() {
+        iconGrid.innerHTML = '';
+        
+        iconOptions.forEach(icon => {
+            const iconElement = document.createElement('div');
+            iconElement.className = 'icon-option';
+            iconElement.dataset.icon = icon.url;
+            
+            const img = document.createElement('img');
+            img.className = 'icon-img';
+            img.src = icon.url;
+            img.alt = icon.name;
+            
+            const name = document.createElement('div');
+            name.className = 'icon-name';
+            name.textContent = icon.name;
+            
+            iconElement.appendChild(img);
+            iconElement.appendChild(name);
+            
+            iconElement.addEventListener('click', () => {
+                document.querySelectorAll('.icon-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                iconElement.classList.add('selected');
+                selectedIcon = icon.url;
+                
+                // Clear any uploaded file
+                fileUpload.value = '';
+            });
+            
+            iconGrid.appendChild(iconElement);
+        });
+        
+        // Select the first icon by default
+        if (iconGrid.firstElementChild) {
+            iconGrid.firstElementChild.classList.add('selected');
+        }
+    }
+    
+    function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith('image/')) {
+            showNotification('Invalid File', 'Please upload an image file.', 'error');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            // Create a custom icon option for the uploaded image
+            const iconElement = document.createElement('div');
+            iconElement.className = 'icon-option selected';
+            
+            const img = document.createElement('img');
+            img.className = 'icon-img';
+            img.src = event.target.result;
+            img.alt = 'Custom Image';
+            
+            const name = document.createElement('div');
+            name.className = 'icon-name';
+            name.textContent = 'Custom';
+            
+            iconElement.appendChild(img);
+            iconElement.appendChild(name);
+            
+            // Clear previous selections
+            document.querySelectorAll('.icon-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add to the grid
+            iconGrid.appendChild(iconElement);
+            
+            // Set as selected
+            selectedIcon = event.target.result;
+            
+            // Scroll to show the new icon
+            iconElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            // Add click handler
+            iconElement.addEventListener('click', () => {
+                document.querySelectorAll('.icon-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                iconElement.classList.add('selected');
+                selectedIcon = event.target.result;
+            });
+        };
+        
+        reader.readAsDataURL(file);
+    }
+    
+    // Add this new function to reset to default cloak
+    function resetToDefaultCloak() {
+        // Reset tab title to default
+        document.title = 'Dashboard | Jimmy Q.R.G.';
+        
+        // Reset favicon to default
+        try {
+            const favicon = document.getElementById('cloakFavicon');
+            if (favicon) {
+                favicon.href = 'https://www.jimmyqrg.com/icon.png';
+            }
+            // Also update all existing favicon links
+            const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+            existingFavicons.forEach(link => {
+                link.href = 'https://www.jimmyqrg.com/icon.png';
+            });
+        } catch (error) {
+            console.log('Could not reset favicon:', error);
+        }
+    }
+    
+    function loadCloakSettings() {
+        // Load saved settings from localStorage
+        const savedDefaultCloak = localStorage.getItem('defaultCloak');
+        const savedIcon = localStorage.getItem('cloakIcon');
+        const savedTabName = localStorage.getItem('cloakTabName');
+        
+        if (savedDefaultCloak !== null) {
+            defaultCloak.checked = savedDefaultCloak === 'true';
+            toggleCustomCloakOptions();
+            
+            // Apply default cloak if it's enabled
+            if (defaultCloak.checked === true) {
+                resetToDefaultCloak();
+            } else if (savedTabName || savedIcon) {
+                // Apply custom cloak settings if they exist
+                if (savedTabName) {
+                    document.title = savedTabName;
+                }
+                
+                if (savedIcon) {
+                    try {
+                        const favicon = document.getElementById('cloakFavicon');
+                        if (favicon) {
+                            favicon.href = savedIcon;
+                        }
+                        // Also update all existing favicon links
+                        const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+                        existingFavicons.forEach(link => {
+                            link.href = savedIcon;
+                        });
+                    } catch (error) {
+                        console.log('Could not load saved favicon:', error);
+                    }
+                }
+            }
+        }
+        
+        if (savedIcon) {
+            selectedIcon = savedIcon;
+            
+            // Find and select the corresponding icon
+            document.querySelectorAll('.icon-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.icon === savedIcon) {
+                    opt.classList.add('selected');
+                }
+            });
+        }
+        
+        if (savedTabName) {
+            tabName.value = savedTabName;
+        }
+    }
+    
+    function applyCloakSettings() {
+        // Save settings
+        localStorage.setItem('defaultCloak', defaultCloak.checked);
+        localStorage.setItem('cloakIcon', selectedIcon);
+        localStorage.setItem('cloakTabName', tabName.value);
+        
+        // Apply or reset cloak based on default setting
+        if (!defaultCloak.checked) {
+            // Apply custom cloak settings
+            // Change tab title
+            if (tabName.value) {
+                document.title = tabName.value;
+            }
+            
+            // Try to change favicon
+            try {
+                const favicon = document.getElementById('cloakFavicon');
+                if (favicon) {
+                    // If the selected icon is a data URL (uploaded image), use it directly
+                    if (selectedIcon.startsWith('data:')) {
+                        favicon.href = selectedIcon;
+                    } else {
+                        // Otherwise, it's a URL
+                        favicon.href = selectedIcon;
+                    }
+                }
+                // Also update all existing favicon links
+                const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+                existingFavicons.forEach(link => {
+                    if (selectedIcon.startsWith('data:')) {
+                        link.href = selectedIcon;
+                    } else {
+                        link.href = selectedIcon;
+                    }
+                });
+            } catch (error) {
+                console.log('Could not update favicon:', error);
+            }
+        } else {
+            // Reset to default cloak settings
+            resetToDefaultCloak();
+        }
+        
+        closeCloakModal();
+    }
+    
+    function showNotification(title, message, type = 'info') {
+        // Remove any existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notification => {
+            notification.remove();
+        });
+        
+        // Create new notification
+        const notification = document.createElement('div');
+        notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+        
+        notification.innerHTML = `
+            <div class="notification-title">${title}</div>
+            <div class="notification-message">${message}</div>
+        `;
+        
+        notificationContainer.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 5000);
+    }
+    
+    // Initialize the application
+    init();
+</script>
+</body>
+</html>
