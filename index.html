@@ -654,6 +654,11 @@
         { name: 'JimmyQRG', url: 'https://www.jimmyqrg.com/icon.png' }
     ];
     
+    // Audio context for controlling sound
+    let audioContext = null;
+    let gainNode = null;
+    let destinationNode = null;
+    
     // Initialize the page
     function init() {
         // Apply cloak settings immediately
@@ -670,6 +675,145 @@
         
         // Load saved cloak settings
         loadCloakSettings();
+        
+        // Initialize audio control
+        initAudioControl();
+    }
+    
+    // Initialize audio control system
+    function initAudioControl() {
+        // Create or get audio context
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            gainNode = audioContext.createGain();
+            destinationNode = audioContext.destination;
+            gainNode.connect(destinationNode);
+            
+            // Set initial volume based on sound state
+            gainNode.gain.value = isSoundOn ? 1.0 : 0.0;
+            
+            // Override the iframe's audio context creation
+            overrideAudioContext();
+            
+            // Also intercept any new audio elements created
+            setupAudioElementInterceptor();
+        }
+    }
+    
+    // Override the AudioContext constructor to control all audio
+    function overrideAudioContext() {
+        const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+        
+        window.AudioContext = function() {
+            const context = new OriginalAudioContext();
+            
+            // Create a gain node for this context
+            const gain = context.createGain();
+            gain.gain.value = isSoundOn ? 1.0 : 0.0;
+            gain.connect(context.destination);
+            
+            // Override the destination
+            const originalDestination = context.destination;
+            Object.defineProperty(context, 'destination', {
+                get: function() {
+                    return isSoundOn ? originalDestination : gain;
+                },
+                set: function() {}
+            });
+            
+            return context;
+        };
+        
+        window.webkitAudioContext = window.AudioContext;
+    }
+    
+    // Intercept audio element creation and playback
+    function setupAudioElementInterceptor() {
+        // Store original methods
+        const originalPlay = HTMLMediaElement.prototype.play;
+        const originalVolumeSetter = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume').set;
+        
+        // Override play method
+        HTMLMediaElement.prototype.play = function() {
+            if (!isSoundOn) {
+                // If sound is off, mute before playing
+                this.muted = true;
+                this.volume = 0;
+            }
+            return originalPlay.call(this);
+        };
+        
+        // Override volume setter
+        Object.defineProperty(HTMLMediaElement.prototype, 'volume', {
+            set: function(value) {
+                if (!isSoundOn) {
+                    // If sound is off, force volume to 0
+                    value = 0;
+                }
+                originalVolumeSetter.call(this, value);
+            },
+            get: function() {
+                return Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume').get.call(this);
+            }
+        });
+        
+        // Override muted setter/getter
+        Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
+            set: function(value) {
+                if (!isSoundOn) {
+                    // If sound is off, force muted to true
+                    value = true;
+                }
+                Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted').set.call(this, value);
+            },
+            get: function() {
+                const muted = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted').get.call(this);
+                // If sound is off, return true regardless of actual muted state
+                return !isSoundOn ? true : muted;
+            }
+        });
+    }
+    
+    // Mute/unmute all audio on the page
+    function toggleAudioState(mute) {
+        // Mute/unmute all audio elements
+        const audioElements = document.getElementsByTagName('audio');
+        const videoElements = document.getElementsByTagName('video');
+        
+        for (let element of [...audioElements, ...videoElements]) {
+            if (mute) {
+                element.muted = true;
+                element.volume = 0;
+            } else {
+                element.muted = false;
+                element.volume = 1;
+            }
+        }
+        
+        // Also handle iframe content
+        try {
+            const iframeDoc = mainIframe.contentDocument || mainIframe.contentWindow.document;
+            const iframeAudio = iframeDoc.getElementsByTagName('audio');
+            const iframeVideo = iframeDoc.getElementsByTagName('video');
+            
+            for (let element of [...iframeAudio, ...iframeVideo]) {
+                if (mute) {
+                    element.muted = true;
+                    element.volume = 0;
+                } else {
+                    element.muted = false;
+                    element.volume = 1;
+                }
+            }
+        } catch (e) {
+            // Cross-origin iframe, can't access directly
+            console.log('Cannot access iframe audio due to cross-origin restrictions');
+        }
+        
+        // Update global audio context gain
+        if (gainNode) {
+            gainNode.gain.value = mute ? 0.0 : 1.0;
+        }
     }
     
     // Apply cloak immediately (before any other scripts run)
@@ -809,6 +953,14 @@
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         document.addEventListener('mozfullscreenchange', handleFullscreenChange);
         document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        
+        // Monitor iframe for page changes to re-apply sound settings
+        mainIframe.addEventListener('load', () => {
+            // Re-apply sound settings after iframe loads
+            setTimeout(() => {
+                toggleAudioState(!isSoundOn);
+            }, 1000);
+        });
     }
     
     function toggleMenuState() {
@@ -837,14 +989,17 @@
         if (isSoundOn) {
             soundIcon.textContent = 'volume_up';
             btnSound.querySelector('.text').textContent = 'Sound On';
-            // In a real implementation, you would unmute the iframe here
-            // Note: This is challenging due to browser security restrictions
+            // Enable sound
+            toggleAudioState(false);
         } else {
             soundIcon.textContent = 'volume_off';
             btnSound.querySelector('.text').textContent = 'Sound Off';
-            // In a real implementation, you would mute the iframe here
-            // Note: This is challenging due to browser security restrictions
+            // Disable sound
+            toggleAudioState(true);
         }
+        
+        // Save sound state
+        localStorage.setItem('soundOn', isSoundOn);
         
         collapseMenu();
     }
@@ -1132,6 +1287,22 @@
                         console.log('Could not load saved favicon:', error);
                     }
                 }
+            }
+        }
+        
+        // Load sound state
+        const savedSoundState = localStorage.getItem('soundOn');
+        if (savedSoundState !== null) {
+            isSoundOn = savedSoundState === 'true';
+            // Apply sound state immediately
+            if (!isSoundOn) {
+                soundIcon.textContent = 'volume_off';
+                btnSound.querySelector('.text').textContent = 'Sound Off';
+                toggleAudioState(true);
+            } else {
+                soundIcon.textContent = 'volume_up';
+                btnSound.querySelector('.text').textContent = 'Sound On';
+                toggleAudioState(false);
             }
         }
         
