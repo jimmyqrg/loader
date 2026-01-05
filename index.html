@@ -206,7 +206,7 @@
             background-color: var(--bg-secondary);
             border-radius: 12px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 10px 25px var(--shadow);
@@ -253,6 +253,12 @@
         /* Form elements */
         .form-group {
             margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group:last-child {
+            border-bottom: none;
         }
 
         .form-label {
@@ -260,6 +266,13 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--text-primary);
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .toggle-switch {
@@ -391,7 +404,33 @@
             font-size: 16px;
         }
 
-        .text-input:focus {
+        .number-input {
+            width: 120px;
+            padding: 12px 16px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .text-input:focus, .number-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .select-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .select-input:focus {
             outline: none;
             border-color: var(--accent);
         }
@@ -430,6 +469,117 @@
             background-color: var(--border);
         }
 
+        /* Slider styles */
+        .slider-container {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-value {
+            display: inline-block;
+            margin-left: 10px;
+            min-width: 40px;
+            color: var(--text-secondary);
+        }
+
+        /* Key binding button */
+        .key-binding-btn {
+            padding: 12px 24px;
+            background-color: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            width: 200px;
+            text-align: center;
+        }
+
+        .key-binding-btn:hover {
+            border-color: var(--accent);
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .key-binding-btn.recording {
+            background-color: var(--danger);
+            border-color: var(--danger);
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-indicator.active {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-indicator.inactive {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.active .status-dot {
+            background-color: var(--success);
+        }
+
+        .status-indicator.inactive .status-dot {
+            background-color: var(--danger);
+        }
+
         /* Notification messages */
         .notification {
             position: fixed;
@@ -452,6 +602,10 @@
 
         .notification.error {
             border-left-color: var(--danger);
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
         }
 
         .notification .notification-title {
@@ -532,9 +686,10 @@
                         <span class="text">Close</span>
                     </button>
                     
-                    <button class="menu-btn" id="btnSound">
-                        <span class="material-icons icon" id="soundIcon">volume_up</span>
-                        <span class="text">Sound On</span>
+                    <!-- Changed from Sound to Auto Clicker -->
+                    <button class="menu-btn" id="btnAutoClicker">
+                        <span class="material-icons icon" id="autoClickerIcon">mouse</span>
+                        <span class="text">Auto Clicker</span>
                     </button>
                     
                     <button class="menu-btn" id="btnRefresh">
@@ -607,6 +762,133 @@
         </div>
     </div>
 
+    <!-- Auto Clicker Modal -->
+    <div class="modal-overlay" id="autoClickerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Auto Clicker Settings</h2>
+                <button class="close-btn" id="closeAutoClickerModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Status Indicator -->
+                <div style="margin-bottom: 20px;">
+                    <span id="autoClickerStatus" class="status-indicator inactive">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Inactive</span>
+                    </span>
+                </div>
+                
+                <!-- CPS Settings -->
+                <div class="form-group">
+                    <h3 style="margin-bottom: 15px; color: var(--accent);">CPS Settings</h3>
+                    
+                    <div class="form-row">
+                        <label class="form-label" style="min-width: 80px;">CPS:</label>
+                        <input type="number" class="number-input" id="cpsInput" min="1" max="1000" value="10">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="form-label">CPS Random Offset: <span id="cpsRandomValue" class="slider-value">0.00</span></label>
+                        <input type="range" class="range-slider" id="cpsRandomSlider" min="0" max="500" value="0" step="1">
+                    </div>
+                </div>
+                
+                <!-- Click Type Settings -->
+                <div class="form-group">
+                    <h3 style="margin-bottom: 15px; color: var(--accent);">Click Type Settings</h3>
+                    
+                    <div class="form-row">
+                        <label class="form-label" style="min-width: 120px;">Click Type:</label>
+                        <select class="select-input" id="clickTypeSelect">
+                            <option value="single">Single Click</option>
+                            <option value="double">Double Click</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <label class="form-label" style="min-width: 120px;">Click Button:</label>
+                        <select class="select-input" id="clickButtonSelect">
+                            <option value="left">Left Click</option>
+                            <option value="right">Right Click</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <label class="form-label" style="min-width: 120px;">Drag Click:</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dragClickToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Drag Click Settings (Hidden by default) -->
+                <div class="hidden-options" id="dragClickSettings">
+                    <div class="form-group">
+                        <h3 style="margin-bottom: 15px; color: var(--accent);">Drag Click Settings</h3>
+                        
+                        <div class="slider-container">
+                            <label class="form-label">Drag Duration (s): <span id="dragDurationValue" class="slider-value">2.00</span></label>
+                            <input type="range" class="range-slider" id="dragDurationSlider" min="0" max="3000" value="200" step="1">
+                        </div>
+                        
+                        <div class="slider-container">
+                            <label class="form-label">Rest Duration (s): <span id="restDurationValue" class="slider-value">1.00</span></label>
+                            <input type="range" class="range-slider" id="restDurationSlider" min="0" max="3000" value="100" step="1">
+                        </div>
+                        
+                        <div class="slider-container">
+                            <label class="form-label">Duration Random Offset (s): <span id="durationRandomValue" class="slider-value">0.00</span></label>
+                            <input type="range" class="range-slider" id="durationRandomSlider" min="0" max="600" value="0" step="1">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Keyboard Settings -->
+                <div class="form-group">
+                    <h3 style="margin-bottom: 15px; color: var(--accent);">Keyboard Settings</h3>
+                    
+                    <div class="form-row">
+                        <label class="form-label" style="min-width: 120px;">Keyboard Type:</label>
+                        <select class="select-input" id="keyboardTypeSelect">
+                            <option value="trigger">Trigger Key</option>
+                            <option value="startStop">Start/Stop Keys</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Trigger Key Settings -->
+                    <div id="triggerKeySettings">
+                        <div class="form-row">
+                            <label class="form-label" style="min-width: 120px;">Trigger Key:</label>
+                            <button class="key-binding-btn" id="triggerKeyBtn">Unbound</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Start/Stop Key Settings (Hidden by default) -->
+                    <div class="hidden-options" id="startStopKeySettings">
+                        <div class="form-row">
+                            <label class="form-label" style="min-width: 120px;">Start Key:</label>
+                            <button class="key-binding-btn" id="startKeyBtn">Unbound</button>
+                        </div>
+                        <div class="form-row">
+                            <label class="form-label" style="min-width: 120px;">Stop Key:</label>
+                            <button class="key-binding-btn" id="stopKeyBtn">Unbound</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Control Buttons -->
+                <div class="button-group">
+                    <button class="btn btn-primary" id="startAutoClicker">Start</button>
+                    <button class="btn btn-secondary" id="stopAutoClicker">Stop</button>
+                    <button class="btn btn-secondary" id="saveAutoClickerSettings">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     // DOM Elements
     const mainContent = document.getElementById('mainContent');
@@ -618,9 +900,9 @@
     const notificationContainer = document.getElementById('notificationContainer');
     
     // Menu buttons
-    const btnClose = document.getElementById('btnClose'); // Changed from btnHome
-    const btnSound = document.getElementById('btnSound');
-    const soundIcon = document.getElementById('soundIcon');
+    const btnClose = document.getElementById('btnClose');
+    const btnAutoClicker = document.getElementById('btnAutoClicker'); // Changed from btnSound
+    const autoClickerIcon = document.getElementById('autoClickerIcon'); // Changed from soundIcon
     const btnRefresh = document.getElementById('btnRefresh');
     const btnDownload = document.getElementById('btnDownload');
     const btnFullscreen = document.getElementById('btnFullscreen');
@@ -638,11 +920,64 @@
     const applyCloak = document.getElementById('applyCloak');
     const cancelCloak = document.getElementById('cancelCloak');
     
+    // Auto Clicker modal elements
+    const autoClickerModal = document.getElementById('autoClickerModal');
+    const closeAutoClickerModal = document.getElementById('closeAutoClickerModal');
+    const autoClickerStatus = document.getElementById('autoClickerStatus');
+    
+    // Auto Clicker settings elements
+    const cpsInput = document.getElementById('cpsInput');
+    const cpsRandomSlider = document.getElementById('cpsRandomSlider');
+    const cpsRandomValue = document.getElementById('cpsRandomValue');
+    const clickTypeSelect = document.getElementById('clickTypeSelect');
+    const clickButtonSelect = document.getElementById('clickButtonSelect');
+    const dragClickToggle = document.getElementById('dragClickToggle');
+    const dragClickSettings = document.getElementById('dragClickSettings');
+    const dragDurationSlider = document.getElementById('dragDurationSlider');
+    const dragDurationValue = document.getElementById('dragDurationValue');
+    const restDurationSlider = document.getElementById('restDurationSlider');
+    const restDurationValue = document.getElementById('restDurationValue');
+    const durationRandomSlider = document.getElementById('durationRandomSlider');
+    const durationRandomValue = document.getElementById('durationRandomValue');
+    const keyboardTypeSelect = document.getElementById('keyboardTypeSelect');
+    const triggerKeySettings = document.getElementById('triggerKeySettings');
+    const startStopKeySettings = document.getElementById('startStopKeySettings');
+    const triggerKeyBtn = document.getElementById('triggerKeyBtn');
+    const startKeyBtn = document.getElementById('startKeyBtn');
+    const stopKeyBtn = document.getElementById('stopKeyBtn');
+    const startAutoClicker = document.getElementById('startAutoClicker');
+    const stopAutoClicker = document.getElementById('stopAutoClicker');
+    const saveAutoClickerSettings = document.getElementById('saveAutoClickerSettings');
+    
     // State variables
     let isMenuExpanded = false;
     let isFullscreen = false;
-    let isSoundOn = true;
     let selectedIcon = 'default.png';
+    
+    // Auto Clicker state variables
+    let isAutoClickerActive = false;
+    let autoClickerInterval = null;
+    let isDragClickActive = false;
+    let dragClickTimeout = null;
+    let isRecordingKey = false;
+    let currentRecordingButton = null;
+    
+    // Auto Clicker settings
+    let autoClickerSettings = {
+        cps: 10,
+        cpsRandomOffset: 0,
+        clickType: 'single',
+        clickButton: 'left',
+        dragClick: false,
+        dragDuration: 2.0,
+        restDuration: 1.0,
+        durationRandomOffset: 0,
+        keyboardType: 'trigger',
+        triggerKey: null,
+        startKey: null,
+        stopKey: null
+    };
+    
     const iconOptions = [
         { name: 'Default', url: 'https://learn.jimmyqrg.com/cloak-images/default.png' },
         { name: 'Gmail', url: 'https://learn.jimmyqrg.com/cloak-images/gmail.png' },
@@ -653,11 +988,6 @@
         { name: 'Schoology', url: 'https://learn.jimmyqrg.com/cloak-images/schoology.png' },
         { name: 'JimmyQRG', url: 'https://www.jimmyqrg.com/icon.png' }
     ];
-    
-    // Audio context for controlling sound
-    let audioContext = null;
-    let gainNode = null;
-    let destinationNode = null;
     
     // Initialize the page
     function init() {
@@ -676,144 +1006,8 @@
         // Load saved cloak settings
         loadCloakSettings();
         
-        // Initialize audio control
-        initAudioControl();
-    }
-    
-    // Initialize audio control system
-    function initAudioControl() {
-        // Create or get audio context
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            gainNode = audioContext.createGain();
-            destinationNode = audioContext.destination;
-            gainNode.connect(destinationNode);
-            
-            // Set initial volume based on sound state
-            gainNode.gain.value = isSoundOn ? 1.0 : 0.0;
-            
-            // Override the iframe's audio context creation
-            overrideAudioContext();
-            
-            // Also intercept any new audio elements created
-            setupAudioElementInterceptor();
-        }
-    }
-    
-    // Override the AudioContext constructor to control all audio
-    function overrideAudioContext() {
-        const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
-        
-        window.AudioContext = function() {
-            const context = new OriginalAudioContext();
-            
-            // Create a gain node for this context
-            const gain = context.createGain();
-            gain.gain.value = isSoundOn ? 1.0 : 0.0;
-            gain.connect(context.destination);
-            
-            // Override the destination
-            const originalDestination = context.destination;
-            Object.defineProperty(context, 'destination', {
-                get: function() {
-                    return isSoundOn ? originalDestination : gain;
-                },
-                set: function() {}
-            });
-            
-            return context;
-        };
-        
-        window.webkitAudioContext = window.AudioContext;
-    }
-    
-    // Intercept audio element creation and playback
-    function setupAudioElementInterceptor() {
-        // Store original methods
-        const originalPlay = HTMLMediaElement.prototype.play;
-        const originalVolumeSetter = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume').set;
-        
-        // Override play method
-        HTMLMediaElement.prototype.play = function() {
-            if (!isSoundOn) {
-                // If sound is off, mute before playing
-                this.muted = true;
-                this.volume = 0;
-            }
-            return originalPlay.call(this);
-        };
-        
-        // Override volume setter
-        Object.defineProperty(HTMLMediaElement.prototype, 'volume', {
-            set: function(value) {
-                if (!isSoundOn) {
-                    // If sound is off, force volume to 0
-                    value = 0;
-                }
-                originalVolumeSetter.call(this, value);
-            },
-            get: function() {
-                return Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'volume').get.call(this);
-            }
-        });
-        
-        // Override muted setter/getter
-        Object.defineProperty(HTMLMediaElement.prototype, 'muted', {
-            set: function(value) {
-                if (!isSoundOn) {
-                    // If sound is off, force muted to true
-                    value = true;
-                }
-                Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted').set.call(this, value);
-            },
-            get: function() {
-                const muted = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'muted').get.call(this);
-                // If sound is off, return true regardless of actual muted state
-                return !isSoundOn ? true : muted;
-            }
-        });
-    }
-    
-    // Mute/unmute all audio on the page
-    function toggleAudioState(mute) {
-        // Mute/unmute all audio elements
-        const audioElements = document.getElementsByTagName('audio');
-        const videoElements = document.getElementsByTagName('video');
-        
-        for (let element of [...audioElements, ...videoElements]) {
-            if (mute) {
-                element.muted = true;
-                element.volume = 0;
-            } else {
-                element.muted = false;
-                element.volume = 1;
-            }
-        }
-        
-        // Also handle iframe content
-        try {
-            const iframeDoc = mainIframe.contentDocument || mainIframe.contentWindow.document;
-            const iframeAudio = iframeDoc.getElementsByTagName('audio');
-            const iframeVideo = iframeDoc.getElementsByTagName('video');
-            
-            for (let element of [...iframeAudio, ...iframeVideo]) {
-                if (mute) {
-                    element.muted = true;
-                    element.volume = 0;
-                } else {
-                    element.muted = false;
-                    element.volume = 1;
-                }
-            }
-        } catch (e) {
-            // Cross-origin iframe, can't access directly
-            console.log('Cannot access iframe audio due to cross-origin restrictions');
-        }
-        
-        // Update global audio context gain
-        if (gainNode) {
-            gainNode.gain.value = mute ? 0.0 : 1.0;
-        }
+        // Load saved auto clicker settings
+        loadAutoClickerSettings();
     }
     
     // Apply cloak immediately (before any other scripts run)
@@ -897,11 +1091,23 @@
                     closeCloakModal();
                 }
                 
+                if (autoClickerModal.classList.contains('active')) {
+                    closeAutoClickerModalFunc();
+                }
+                
                 // Also exit fullscreen if active
                 if (isFullscreen) {
                     exitFullscreen();
                 }
+                
+                // Stop recording if active
+                if (isRecordingKey) {
+                    stopRecordingKey();
+                }
             }
+            
+            // Handle auto clicker keyboard shortcuts
+            handleAutoClickerKeyPress(e);
         });
         
         // Menu button events
@@ -910,7 +1116,8 @@
             collapseMenu();
         });
         
-        btnSound.addEventListener('click', toggleSound);
+        // Auto Clicker button
+        btnAutoClicker.addEventListener('click', openAutoClickerModal);
         
         btnRefresh.addEventListener('click', () => {
             mainIframe.contentWindow.location.reload();
@@ -948,19 +1155,41 @@
             closeCloakModal();
         });
         
+        // Auto Clicker modal events
+        closeAutoClickerModal.addEventListener('click', closeAutoClickerModalFunc);
+        autoClickerModal.addEventListener('click', (e) => {
+            if (e.target === autoClickerModal) {
+                closeAutoClickerModalFunc();
+            }
+        });
+        
+        // Auto Clicker settings events
+        cpsInput.addEventListener('input', updateCps);
+        cpsRandomSlider.addEventListener('input', updateCpsRandomOffset);
+        
+        dragClickToggle.addEventListener('change', toggleDragClickSettings);
+        
+        dragDurationSlider.addEventListener('input', updateDragDuration);
+        restDurationSlider.addEventListener('input', updateRestDuration);
+        durationRandomSlider.addEventListener('input', updateDurationRandomOffset);
+        
+        keyboardTypeSelect.addEventListener('change', toggleKeyboardSettings);
+        
+        // Key binding buttons
+        triggerKeyBtn.addEventListener('click', () => startRecordingKey(triggerKeyBtn, 'trigger'));
+        startKeyBtn.addEventListener('click', () => startRecordingKey(startKeyBtn, 'start'));
+        stopKeyBtn.addEventListener('click', () => startRecordingKey(stopKeyBtn, 'stop'));
+        
+        // Control buttons
+        startAutoClicker.addEventListener('click', startAutoClickerFunc);
+        stopAutoClicker.addEventListener('click', stopAutoClickerFunc);
+        saveAutoClickerSettings.addEventListener('click', saveAutoClickerSettingsFunc);
+        
         // Fullscreen change listener
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
         document.addEventListener('mozfullscreenchange', handleFullscreenChange);
         document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-        
-        // Monitor iframe for page changes to re-apply sound settings
-        mainIframe.addEventListener('load', () => {
-            // Re-apply sound settings after iframe loads
-            setTimeout(() => {
-                toggleAudioState(!isSoundOn);
-            }, 1000);
-        });
     }
     
     function toggleMenuState() {
@@ -983,25 +1212,407 @@
         isMenuExpanded = false;
     }
     
-    function toggleSound() {
-        isSoundOn = !isSoundOn;
-        
-        if (isSoundOn) {
-            soundIcon.textContent = 'volume_up';
-            btnSound.querySelector('.text').textContent = 'Sound On';
-            // Enable sound
-            toggleAudioState(false);
+    function openAutoClickerModal() {
+        autoClickerModal.classList.add('active');
+        collapseMenu();
+        updateAutoClickerUI();
+    }
+    
+    function closeAutoClickerModalFunc() {
+        autoClickerModal.classList.remove('active');
+        if (isRecordingKey) {
+            stopRecordingKey();
+        }
+    }
+    
+    function updateAutoClickerUI() {
+        // Update status indicator
+        if (isAutoClickerActive) {
+            autoClickerStatus.className = 'status-indicator active';
+            autoClickerStatus.querySelector('.status-text').textContent = 'Active';
+            startAutoClicker.disabled = true;
+            stopAutoClicker.disabled = false;
         } else {
-            soundIcon.textContent = 'volume_off';
-            btnSound.querySelector('.text').textContent = 'Sound Off';
-            // Disable sound
-            toggleAudioState(true);
+            autoClickerStatus.className = 'status-indicator inactive';
+            autoClickerStatus.querySelector('.status-text').textContent = 'Inactive';
+            startAutoClicker.disabled = false;
+            stopAutoClicker.disabled = true;
         }
         
-        // Save sound state
-        localStorage.setItem('soundOn', isSoundOn);
+        // Update button text based on key bindings
+        if (autoClickerSettings.triggerKey) {
+            triggerKeyBtn.textContent = formatKeyName(autoClickerSettings.triggerKey);
+        }
         
-        collapseMenu();
+        if (autoClickerSettings.startKey) {
+            startKeyBtn.textContent = formatKeyName(autoClickerSettings.startKey);
+        }
+        
+        if (autoClickerSettings.stopKey) {
+            stopKeyBtn.textContent = formatKeyName(autoClickerSettings.stopKey);
+        }
+    }
+    
+    function formatKeyName(key) {
+        if (!key) return 'Unbound';
+        
+        // Common key mappings
+        const keyMap = {
+            ' ': 'Space',
+            'Control': 'Ctrl',
+            'Alt': 'Alt',
+            'Shift': 'Shift',
+            'Meta': 'Meta',
+            'Escape': 'Esc',
+            'ArrowUp': '↑',
+            'ArrowDown': '↓',
+            'ArrowLeft': '←',
+            'ArrowRight': '→'
+        };
+        
+        return keyMap[key] || key;
+    }
+    
+    function updateCps() {
+        autoClickerSettings.cps = parseInt(cpsInput.value) || 10;
+        if (autoClickerSettings.cps < 1) autoClickerSettings.cps = 1;
+        if (autoClickerSettings.cps > 1000) autoClickerSettings.cps = 1000;
+        cpsInput.value = autoClickerSettings.cps;
+    }
+    
+    function updateCpsRandomOffset() {
+        const value = parseInt(cpsRandomSlider.value) / 100;
+        autoClickerSettings.cpsRandomOffset = value;
+        cpsRandomValue.textContent = value.toFixed(2);
+    }
+    
+    function toggleDragClickSettings() {
+        autoClickerSettings.dragClick = dragClickToggle.checked;
+        if (autoClickerSettings.dragClick) {
+            dragClickSettings.classList.add('expanded');
+        } else {
+            dragClickSettings.classList.remove('expanded');
+        }
+    }
+    
+    function updateDragDuration() {
+        const value = parseInt(dragDurationSlider.value) / 100;
+        autoClickerSettings.dragDuration = value;
+        dragDurationValue.textContent = value.toFixed(2);
+    }
+    
+    function updateRestDuration() {
+        const value = parseInt(restDurationSlider.value) / 100;
+        autoClickerSettings.restDuration = value;
+        restDurationValue.textContent = value.toFixed(2);
+    }
+    
+    function updateDurationRandomOffset() {
+        const value = parseInt(durationRandomSlider.value) / 100;
+        autoClickerSettings.durationRandomOffset = value;
+        durationRandomValue.textContent = value.toFixed(2);
+    }
+    
+    function toggleKeyboardSettings() {
+        autoClickerSettings.keyboardType = keyboardTypeSelect.value;
+        if (autoClickerSettings.keyboardType === 'trigger') {
+            triggerKeySettings.style.display = 'block';
+            startStopKeySettings.classList.remove('expanded');
+        } else {
+            triggerKeySettings.style.display = 'none';
+            startStopKeySettings.classList.add('expanded');
+        }
+    }
+    
+    function startRecordingKey(button, keyType) {
+        if (isRecordingKey) {
+            stopRecordingKey();
+            if (currentRecordingButton === button) return;
+        }
+        
+        isRecordingKey = true;
+        currentRecordingButton = button;
+        button.textContent = 'RECORDING';
+        button.classList.add('recording');
+        
+        showNotification('Recording Key', 'Press any key to bind. Press ESC to cancel.', 'info');
+    }
+    
+    function stopRecordingKey() {
+        if (!isRecordingKey) return;
+        
+        isRecordingKey = false;
+        if (currentRecordingButton) {
+            currentRecordingButton.classList.remove('recording');
+            
+            // Restore previous key text
+            const keyType = currentRecordingButton.id.replace('Btn', '').replace('Key', '');
+            switch(keyType) {
+                case 'trigger':
+                    currentRecordingButton.textContent = autoClickerSettings.triggerKey ? formatKeyName(autoClickerSettings.triggerKey) : 'Unbound';
+                    break;
+                case 'start':
+                    currentRecordingButton.textContent = autoClickerSettings.startKey ? formatKeyName(autoClickerSettings.startKey) : 'Unbound';
+                    break;
+                case 'stop':
+                    currentRecordingButton.textContent = autoClickerSettings.stopKey ? formatKeyName(autoClickerSettings.stopKey) : 'Unbound';
+                    break;
+            }
+        }
+        currentRecordingButton = null;
+    }
+    
+    function handleAutoClickerKeyPress(e) {
+        if (!isRecordingKey) {
+            // Check if pressed key matches any bound key
+            const key = e.key;
+            
+            if (autoClickerSettings.keyboardType === 'trigger' && autoClickerSettings.triggerKey === key) {
+                if (isAutoClickerActive) {
+                    stopAutoClickerFunc();
+                } else {
+                    startAutoClickerFunc();
+                }
+                e.preventDefault();
+            } else if (autoClickerSettings.keyboardType === 'startStop') {
+                if (autoClickerSettings.startKey === key) {
+                    startAutoClickerFunc();
+                    e.preventDefault();
+                } else if (autoClickerSettings.stopKey === key) {
+                    stopAutoClickerFunc();
+                    e.preventDefault();
+                }
+            }
+            return;
+        }
+        
+        // Handle key recording
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (e.key === 'Escape') {
+            stopRecordingKey();
+            showNotification('Key Binding Cancelled', 'Key binding was cancelled.', 'warning');
+            return;
+        }
+        
+        const key = e.key;
+        const buttonId = currentRecordingButton.id;
+        
+        if (buttonId === 'triggerKeyBtn') {
+            autoClickerSettings.triggerKey = key;
+            currentRecordingButton.textContent = formatKeyName(key);
+            showNotification('Trigger Key Set', `Trigger key set to: ${formatKeyName(key)}`, 'success');
+        } else if (buttonId === 'startKeyBtn') {
+            autoClickerSettings.startKey = key;
+            currentRecordingButton.textContent = formatKeyName(key);
+            showNotification('Start Key Set', `Start key set to: ${formatKeyName(key)}`, 'success');
+        } else if (buttonId === 'stopKeyBtn') {
+            autoClickerSettings.stopKey = key;
+            currentRecordingButton.textContent = formatKeyName(key);
+            showNotification('Stop Key Set', `Stop key set to: ${formatKeyName(key)}`, 'success');
+        }
+        
+        stopRecordingKey();
+    }
+    
+    function startAutoClickerFunc() {
+        if (isAutoClickerActive) return;
+        
+        // Update settings from UI
+        updateCps();
+        updateCpsRandomOffset();
+        autoClickerSettings.clickType = clickTypeSelect.value;
+        autoClickerSettings.clickButton = clickButtonSelect.value;
+        autoClickerSettings.dragClick = dragClickToggle.checked;
+        updateDragDuration();
+        updateRestDuration();
+        updateDurationRandomOffset();
+        autoClickerSettings.keyboardType = keyboardTypeSelect.value;
+        
+        isAutoClickerActive = true;
+        updateAutoClickerUI();
+        
+        // Calculate click interval with random offset
+        const baseInterval = 1000 / autoClickerSettings.cps;
+        const randomOffset = (Math.random() * 2 - 1) * autoClickerSettings.cpsRandomOffset;
+        const actualInterval = Math.max(10, baseInterval + randomOffset);
+        
+        if (autoClickerSettings.dragClick) {
+            startDragClick();
+        } else {
+            autoClickerInterval = setInterval(performClick, actualInterval);
+        }
+        
+        showNotification('Auto Clicker Started', 'Auto clicker is now active.', 'success');
+    }
+    
+    function stopAutoClickerFunc() {
+        if (!isAutoClickerActive) return;
+        
+        isAutoClickerActive = false;
+        updateAutoClickerUI();
+        
+        if (autoClickerInterval) {
+            clearInterval(autoClickerInterval);
+            autoClickerInterval = null;
+        }
+        
+        if (dragClickTimeout) {
+            clearTimeout(dragClickTimeout);
+            dragClickTimeout = null;
+        }
+        
+        if (isDragClickActive) {
+            isDragClickActive = false;
+        }
+        
+        showNotification('Auto Clicker Stopped', 'Auto clicker has been stopped.', 'info');
+    }
+    
+    function performClick() {
+        try {
+            const iframeWindow = mainIframe.contentWindow;
+            const iframeDocument = mainIframe.contentDocument;
+            
+            if (!iframeWindow || !iframeDocument) return;
+            
+            // Get the center of the iframe
+            const rect = mainIframe.getBoundingClientRect();
+            const x = rect.width / 2;
+            const y = rect.height / 2;
+            
+            // Create mouse events
+            const mouseDownEvent = new MouseEvent('mousedown', {
+                view: iframeWindow,
+                bubbles: true,
+                cancelable: true,
+                clientX: x,
+                clientY: y,
+                button: autoClickerSettings.clickButton === 'left' ? 0 : 2
+            });
+            
+            const mouseUpEvent = new MouseEvent('mouseup', {
+                view: iframeWindow,
+                bubbles: true,
+                cancelable: true,
+                clientX: x,
+                clientY: y,
+                button: autoClickerSettings.clickButton === 'left' ? 0 : 2
+            });
+            
+            // Perform click(s)
+            if (autoClickerSettings.clickType === 'double') {
+                // Double click
+                iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseDownEvent);
+                iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseUpEvent);
+                
+                setTimeout(() => {
+                    iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseDownEvent);
+                    iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseUpEvent);
+                }, 50);
+            } else {
+                // Single click
+                iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseDownEvent);
+                iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseUpEvent);
+            }
+            
+        } catch (error) {
+            console.log('Auto clicker error:', error);
+        }
+    }
+    
+    function startDragClick() {
+        if (!isAutoClickerActive || !autoClickerSettings.dragClick) return;
+        
+        isDragClickActive = true;
+        performDragClickCycle();
+    }
+    
+    function performDragClickCycle() {
+        if (!isAutoClickerActive || !isDragClickActive) return;
+        
+        // Perform a click
+        performClick();
+        
+        // Calculate next click time with random offset
+        const baseInterval = 1000 / autoClickerSettings.cps;
+        const randomOffset = (Math.random() * 2 - 1) * autoClickerSettings.cpsRandomOffset;
+        const actualInterval = Math.max(10, baseInterval + randomOffset);
+        
+        // Check if we should pause for drag duration
+        if (Math.random() < 0.3) { // 30% chance to start a drag
+            const dragDuration = autoClickerSettings.dragDuration * 1000 + 
+                (Math.random() * 2 - 1) * autoClickerSettings.durationRandomOffset * 1000;
+            const restDuration = autoClickerSettings.restDuration * 1000 + 
+                (Math.random() * 2 - 1) * autoClickerSettings.durationRandomOffset * 1000;
+            
+            // Schedule next click after drag and rest
+            dragClickTimeout = setTimeout(() => {
+                performDragClickCycle();
+            }, dragDuration + restDuration);
+        } else {
+            // Schedule next click normally
+            dragClickTimeout = setTimeout(() => {
+                performDragClickCycle();
+            }, actualInterval);
+        }
+    }
+    
+    function saveAutoClickerSettingsFunc() {
+        // Update settings from UI
+        updateCps();
+        updateCpsRandomOffset();
+        autoClickerSettings.clickType = clickTypeSelect.value;
+        autoClickerSettings.clickButton = clickButtonSelect.value;
+        autoClickerSettings.dragClick = dragClickToggle.checked;
+        updateDragDuration();
+        updateRestDuration();
+        updateDurationRandomOffset();
+        autoClickerSettings.keyboardType = keyboardTypeSelect.value;
+        
+        // Save to localStorage
+        localStorage.setItem('autoClickerSettings', JSON.stringify(autoClickerSettings));
+        
+        showNotification('Settings Saved', 'Auto clicker settings have been saved.', 'success');
+    }
+    
+    function loadAutoClickerSettings() {
+        const savedSettings = localStorage.getItem('autoClickerSettings');
+        if (savedSettings) {
+            try {
+                autoClickerSettings = JSON.parse(savedSettings);
+                
+                // Update UI elements
+                cpsInput.value = autoClickerSettings.cps;
+                cpsRandomSlider.value = Math.round(autoClickerSettings.cpsRandomOffset * 100);
+                cpsRandomValue.textContent = autoClickerSettings.cpsRandomOffset.toFixed(2);
+                
+                clickTypeSelect.value = autoClickerSettings.clickType;
+                clickButtonSelect.value = autoClickerSettings.clickButton;
+                
+                dragClickToggle.checked = autoClickerSettings.dragClick;
+                toggleDragClickSettings();
+                
+                dragDurationSlider.value = Math.round(autoClickerSettings.dragDuration * 100);
+                dragDurationValue.textContent = autoClickerSettings.dragDuration.toFixed(2);
+                
+                restDurationSlider.value = Math.round(autoClickerSettings.restDuration * 100);
+                restDurationValue.textContent = autoClickerSettings.restDuration.toFixed(2);
+                
+                durationRandomSlider.value = Math.round(autoClickerSettings.durationRandomOffset * 100);
+                durationRandomValue.textContent = autoClickerSettings.durationRandomOffset.toFixed(2);
+                
+                keyboardTypeSelect.value = autoClickerSettings.keyboardType;
+                toggleKeyboardSettings();
+                
+                // Update button texts
+                updateAutoClickerUI();
+                
+            } catch (error) {
+                console.log('Error loading auto clicker settings:', error);
+            }
+        }
     }
     
     async function downloadSource() {
@@ -1290,22 +1901,6 @@
             }
         }
         
-        // Load sound state
-        const savedSoundState = localStorage.getItem('soundOn');
-        if (savedSoundState !== null) {
-            isSoundOn = savedSoundState === 'true';
-            // Apply sound state immediately
-            if (!isSoundOn) {
-                soundIcon.textContent = 'volume_off';
-                btnSound.querySelector('.text').textContent = 'Sound Off';
-                toggleAudioState(true);
-            } else {
-                soundIcon.textContent = 'volume_up';
-                btnSound.querySelector('.text').textContent = 'Sound On';
-                toggleAudioState(false);
-            }
-        }
-        
         if (savedIcon) {
             selectedIcon = savedIcon;
             
@@ -1378,7 +1973,7 @@
         
         // Create new notification
         const notification = document.createElement('div');
-        notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+        notification.className = `notification ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`;
         
         notification.innerHTML = `
             <div class="notification-title">${title}</div>
