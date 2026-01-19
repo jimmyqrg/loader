@@ -87,14 +87,13 @@ let autoClickerSettings = {
 };
 
 const iconOptions = [
-    { name: 'Default', url: 'https://learn.jimmyqrg.com/cloak-images/default.png' },
-    { name: 'Gmail', url: 'https://learn.jimmyqrg.com/cloak-images/gmail.png' },
-    { name: 'Drive', url: 'https://learn.jimmyqrg.com/cloak-images/drive.png' },
-    { name: 'Docs', url: 'https://learn.jimmyqrg.com/cloak-images/docs.png' },
-    { name: 'Forms', url: 'https://learn.jimmyqrg.com/cloak-images/forms.png' },
-    { name: 'Pausd', url: 'https://learn.jimmyqrg.com/cloak-images/pausd.png' },
-    { name: 'Schoology', url: 'https://learn.jimmyqrg.com/cloak-images/schoology.png' },
-    { name: 'JimmyQRG', url: 'https://www.jimmyqrg.com/icon.png' }
+    { name: 'Default', url: 'https://pausd.schooloqy.com/cloak-images/default.png' },
+    { name: 'Gmail', url: 'https://pausd.schooloqy.com/cloak-images/gmail.png' },
+    { name: 'Drive', url: 'https://pausd.schooloqy.com/cloak-images/drive.png' },
+    { name: 'Docs', url: 'https://pausd.schooloqy.com/cloak-images/docs.png' },
+    { name: 'Forms', url: 'https://pausd.schooloqy.com/cloak-images/forms.png' },
+    { name: 'Pausd', url: 'https://pausd.schooloqy.com/cloak-images/pausd.png' },
+    { name: 'Schoology', url: 'https://pausd.schooloqy.com/cloak-images/schoology.png' },
 ];
 
 // Initialize the page
@@ -149,7 +148,7 @@ function checkContentParam() {
     const params = new URLSearchParams(window.location.search);
     const raw = params.get('content');
     
-    let urlToLoad = 'https://learn.jimmyqrg.com/?page=extend'; // Default URL
+    let urlToLoad = 'https://pausd.schooloqy.com/?page=extend'; // Default URL
     
     if (raw) {
         // Decode and validate URL from ?content= parameter
@@ -954,18 +953,18 @@ function handleImageUpload(e) {
 // Add this new function to reset to default cloak
 function resetToDefaultCloak() {
     // Reset tab title to default
-    document.title = 'Dashboard | Jimmy Q.R.G.';
+    document.title = 'loader';
     
     // Reset favicon to default
     try {
         const favicon = document.getElementById('cloakFavicon');
         if (favicon) {
-            favicon.href = 'https://www.jimmyqrg.com/icon.png';
+            favicon.href = 'https://pausd.schooloqy.com/jq.ico';
         }
         // Also update all existing favicon links
         const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
         existingFavicons.forEach(link => {
-            link.href = 'https://www.jimmyqrg.com/icon.png';
+            link.href = 'https://pausd.schooloqy.com/jq.ico';
         });
     } catch (error) {
         console.log('Could not reset favicon:', error);
