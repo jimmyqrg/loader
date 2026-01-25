@@ -87,13 +87,13 @@ let autoClickerSettings = {
 };
 
 const iconOptions = [
-    { name: 'Default', url: 'https://pausd.schooloqy.com/cloak-images/default.png' },
-    { name: 'Gmail', url: 'https://pausd.schooloqy.com/cloak-images/gmail.png' },
-    { name: 'Drive', url: 'https://pausd.schooloqy.com/cloak-images/drive.png' },
-    { name: 'Docs', url: 'https://pausd.schooloqy.com/cloak-images/docs.png' },
-    { name: 'Forms', url: 'https://pausd.schooloqy.com/cloak-images/forms.png' },
-    { name: 'Pausd', url: 'https://pausd.schooloqy.com/cloak-images/pausd.png' },
-    { name: 'Schoology', url: 'https://pausd.schooloqy.com/cloak-images/schoology.png' },
+    { name: 'Default', url: 'https://jimmyqrg.github.io/cloak-images/default.png' },
+    { name: 'Gmail', url: 'https://jimmyqrg.github.io/cloak-images/gmail.png' },
+    { name: 'Drive', url: 'https://jimmyqrg.github.io/cloak-images/drive.png' },
+    { name: 'Docs', url: 'https://jimmyqrg.github.io/cloak-images/docs.png' },
+    { name: 'Forms', url: 'https://jimmyqrg.github.io/cloak-images/forms.png' },
+    { name: 'Pausd', url: 'https://jimmyqrg.github.io/cloak-images/pausd.png' },
+    { name: 'Schoology', url: 'https://jimmyqrg.github.io/cloak-images/schoology.png' },
 ];
 
 // Initialize the page
@@ -148,7 +148,7 @@ function checkContentParam() {
     const params = new URLSearchParams(window.location.search);
     const raw = params.get('content');
     
-    let urlToLoad = 'https://pausd.schooloqy.com/?page=extend'; // Default URL
+    let urlToLoad = 'https://jimmyqrg.github.io/?page=extend'; // Default URL
     
     if (raw) {
         // Decode and validate URL from ?content= parameter
@@ -959,12 +959,12 @@ function resetToDefaultCloak() {
     try {
         const favicon = document.getElementById('cloakFavicon');
         if (favicon) {
-            favicon.href = 'https://pausd.schooloqy.com/jq.ico';
+            favicon.href = 'https://jimmyqrg.github.io/jq.ico';
         }
         // Also update all existing favicon links
         const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
         existingFavicons.forEach(link => {
-            link.href = 'https://pausd.schooloqy.com/jq.ico';
+            link.href = 'https://jimmyqrg.github.io/jq.ico';
         });
     } catch (error) {
         console.log('Could not reset favicon:', error);
