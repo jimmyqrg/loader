@@ -167,7 +167,8 @@ function checkContentParam() {
                     urlToLoad = url.href;
                 }
             } catch { 
-                console.log('Error: invalid URL in content parameter.');
+                console.log("Error: invalid URL in content parameter, we'll use the default url instead.");
+                window.location.href="https://jimmyqrg.github.io/loader/?content=https://jimmyqrg.github.io/404.html"
             }
         }
     }
