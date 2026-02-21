@@ -585,19 +585,30 @@ function performClick() {
         
         if (!iframeWindow || !iframeDocument) return;
         
-        // Get the center of the iframe
-        const rect = mainIframe.getBoundingClientRect();
-        const x = rect.width / 2;
-        const y = rect.height / 2;
+        // Get the iframe's content dimensions
+        const iframeRect = mainIframe.getBoundingClientRect();
+        const iframeWidth = iframeDocument.documentElement.clientWidth || iframeDocument.body.clientWidth || iframeRect.width;
+        const iframeHeight = iframeDocument.documentElement.clientHeight || iframeDocument.body.clientHeight || iframeRect.height;
         
-        // Create mouse events
+        // Calculate center coordinates relative to iframe's viewport
+        const x = iframeWidth / 2;
+        const y = iframeHeight / 2;
+        
+        // Get the element at the center point
+        const element = iframeDocument.elementFromPoint(x, y);
+        if (!element) return;
+        
+        // Create mouse events with proper coordinates
         const mouseDownEvent = new MouseEvent('mousedown', {
             view: iframeWindow,
             bubbles: true,
             cancelable: true,
             clientX: x,
             clientY: y,
-            button: autoClickerSettings.clickButton === 'left' ? 0 : 2
+            screenX: iframeRect.left + x,
+            screenY: iframeRect.top + y,
+            button: autoClickerSettings.clickButton === 'left' ? 0 : 2,
+            buttons: autoClickerSettings.clickButton === 'left' ? 1 : 2
         });
         
         const mouseUpEvent = new MouseEvent('mouseup', {
@@ -606,23 +617,43 @@ function performClick() {
             cancelable: true,
             clientX: x,
             clientY: y,
+            screenX: iframeRect.left + x,
+            screenY: iframeRect.top + y,
+            button: autoClickerSettings.clickButton === 'left' ? 0 : 2,
+            buttons: 0
+        });
+        
+        const clickEvent = new MouseEvent('click', {
+            view: iframeWindow,
+            bubbles: true,
+            cancelable: true,
+            clientX: x,
+            clientY: y,
+            screenX: iframeRect.left + x,
+            screenY: iframeRect.top + y,
             button: autoClickerSettings.clickButton === 'left' ? 0 : 2
         });
         
         // Perform click(s)
         if (autoClickerSettings.clickType === 'double') {
             // Double click
-            iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseDownEvent);
-            iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseUpEvent);
+            element.dispatchEvent(mouseDownEvent);
+            element.dispatchEvent(mouseUpEvent);
+            element.dispatchEvent(clickEvent);
             
             setTimeout(() => {
-                iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseDownEvent);
-                iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseUpEvent);
+                const element2 = iframeDocument.elementFromPoint(x, y);
+                if (element2) {
+                    element2.dispatchEvent(mouseDownEvent);
+                    element2.dispatchEvent(mouseUpEvent);
+                    element2.dispatchEvent(clickEvent);
+                }
             }, 50);
         } else {
             // Single click
-            iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseDownEvent);
-            iframeDocument.elementFromPoint(x, y).dispatchEvent(mouseUpEvent);
+            element.dispatchEvent(mouseDownEvent);
+            element.dispatchEvent(mouseUpEvent);
+            element.dispatchEvent(clickEvent);
         }
         
     } catch (error) {
